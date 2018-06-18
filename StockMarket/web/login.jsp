@@ -1,71 +1,80 @@
-<%-- 
-    Document   : login
-    Created on : Jun 12, 2018, 11:14:10 PM
-    Author     : Ishara Jayasuriya
---%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-        <link href="bootstrap//bootstrap.min.css" rel="stylesheet"/>
-        <script src="bootstrap/jquery-3.3.1.js"></script>
-        <script src="bootstrap//bootstrap.min.js"></script>
-    </head>
-    <body class="bg-dark">
-        <div class="">
-            <center>
-
-                <div class="card" style="width: 25rem;margin-top: 50px">
-                    <div class="card-header">
-                        Login in to Your Account
-                    </div>
-                    <div class="card-body" style="margin-left: 60px">
-
-                        <form action="login" method="post">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Untitled 1</title>
+<link rel="stylesheet" href="css/bootstrap.css"/>
+<link rel="stylesheet" href="css/bootstrap.min.css"/>
+<link rel="stylesheet" href="css/reset.css"/>
+<link rel="stylesheet" href="css/animate.css"/>
+<link rel="stylesheet" href="css/styles.css"/>
+<link href='http://fonts.googleapis.com/css?family=Permanent+Marker' rel='stylesheet' type='text/css'/>
+<script src="js/jquery-1.11.0.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script type="text/javascript">
+</script>
+<style type="text/css">
+body {
+    width: 100%;
+    height: 100%;
+    background-image:url(bk%20pic/apr_photo_12_0.jpg);
+}
 
 
-                            <div class="row">
-                                <div class="col-sm-12 col-md-10  col-md-offset-1 ">
-                                    <div class="form-group">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">
-                                                <i class="glyphicon glyphicon-user"></i>
-                                            </span> 
-                                            <input type="text" name="email" placeholder="Email" class="form-control" autofocus required>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">
-                                                <i class="glyphicon glyphicon-lock"></i>
-                                            </span>
-                                            <input name="pass" autocomplete="off" class="form-control" placeholder="Password" type="password" required>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <input type="checkbox" id="user_rememberme" name="user_rememberme" value="1" />
-                                        <label for="user_rememberme"><small>Keep me logged in</small></label>
-                                    </div>
-                                    <div class="form-group">
-                                        <input type="submit" name="login" class="btn btn-primary btn-block" value="Sign in">
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
+</style>
+</head>
+<body>
 
-                    </div>
-                    <div class="modal-footer">
-                        <a href="#">Forgot Password?</a>
-                        <a href="register.jsp">Register</a>
-                    </div>
-                </div>
-            </center>
-            <nav class="navbar fixed-bottom navbar-dark bg-dark">
-                <lable class="navbar-item" style="color: #ffffff">Copyright 2018 - StockMarket.lk All rights reserved</lable>
-            </nav>
-        </div>
-    </body>
-</html>
+
+
+<div class="col-lg-12">
+<div class="login-section ">
+<div class="col-lg-12 hidden-xs">
+			<div class="container-fluid ">
+			    <div class="jumbotron " style="background-color:transparent;" >
+			        <h1 style="margin-top:100px; text-align:center; font-family: 'Permanent Marker', cursive; color:#FFF">Please Loging !!!</h1>		        
+			    </div>
+			</div>  
+</div>
+
+<!-- Begin Page Content -->
+	
+	<div id="container" style="background-color:transparent; position:absolute; z-index:+2; margin-top:125px" >
+		
+		<form method="post" action="">
+				
+		<label for="name" style="color:#CCC" >User name:</label>
+		
+		<input type="name" name="username"/>
+		
+		<label for="username" style="color:#CCC">Password:</label>
+		
+		<p><a href="#">Forgot your password?</a> </p> 
+		
+		<input type="password" name="password"/>
+		
+		<div id="lower" style="background-color:transparent">
+	
+       
+        <input type="submit" value="signup"/> 
+       <input type="submit"  class="cancelbtn"  value="Cancel" /> 
+       <input type="submit" value="Loging" class="signupbtn"/>  
+        
+		</div>
+         <input type="checkbox"/><label class="check" for="checkbox" style="background-color:transparent;font-size:15px; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif color: gray">Keep me logged in</label>
+         
+         
+		
+		</form>
+		
+	</div>
+
+	<!-- End Page Content -->
+
+</div>
+   
+</div>
+       
+</body>
+	
