@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public class StockService {
 
     public boolean Create(Stock vm) {
@@ -31,7 +30,7 @@ public class StockService {
         return isSaved;
     }
 
-     public void SellItem(int stockTransactionId, int qty, double sellingPrice, int turnId, int bankAccoundId) {
+    public void SellItem(int stockTransactionId, int qty, double sellingPrice, int turnId, int bankAccoundId) {
         StockTransaction StockTransaction = new StockTransaction();
         ResultSet rs = null;
         try {
@@ -66,6 +65,20 @@ public class StockService {
             String updateQry = "UPDATE BankAccount SET Balance = '" + (currentBalance + sellingPrice) + "' WHERE Id = '" + bankAccoundId + "'";
             DB.save(updateQry);
 
+            String selectQry2 = "SELECT * FROM Turn where (select MAX(Id) from Turn)";
+            rs = DB.fetch(selectQry2);
+            int TurnId;
+            int Turn = 0;
+            while (rs.next()) {
+                TurnId = rs.getInt(1);
+                Turn = rs.getInt(2);
+            }
+            rs.close();
+            if (Turn != 20) {
+                String insertQry4 = "INSERT INTO Turn(Turn) values ('" + Turn + 1 + "')";
+                DB.save(insertQry4);
+            }
+
         } catch (Exception e) {
 
         } finally {
@@ -76,6 +89,32 @@ public class StockService {
                 }
             }
         }
+    }
+
+    public Turn getCurrentTurn() {
+        ResultSet rs = null;
+        Turn t = new Turn();
+        try {
+
+            String searchQry = "SELECT * FROM Turn WHERE Id=(SELECT MAX(Id) from Turn)";
+            rs = DB.fetch(searchQry);
+            while (rs.next()) {
+                t.Id = rs.getInt(1);
+                t.Turn = rs.getInt(2);
+            }
+
+        } catch (Exception e) {
+
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+
+        return t;
     }
 
     public void BuyItem(int qty, int stockId, int turnId, int bankAccoundId) {
@@ -102,6 +141,20 @@ public class StockService {
             String updateQry = "UPDATE BankAccount SET Balance = '" + (currentBalance + currentPrice) + "' WHERE Id = '" + bankAccoundId + "'";
             DB.save(updateQry);
 
+            String selectQry2 = "SELECT * FROM Turn where (select MAX(Id) from Turn)";
+            rs = DB.fetch(selectQry2);
+            int TurnId = 0;
+            int Turn = 0;
+            while (rs.next()) {
+                TurnId = rs.getInt(1);
+                Turn = rs.getInt(2);
+            }
+            rs.close();
+            if (Turn != 20) {
+                String insertQry4 = "INSERT INTO Turn(Turn) values ('" + Turn + 1 + "')";
+                DB.save(insertQry4);
+            }
+
         } catch (Exception e) {
 
         } finally {
@@ -113,7 +166,71 @@ public class StockService {
             }
         }
     }
-    
+
+    public ArrayList<StockTransaction> GetSellingItem(int bankId) {
+        ArrayList<StockTransaction> stockTransactionList = new ArrayList<StockTransaction>();
+        ResultSet rs = null;
+        try {
+            String searchQry = "SELECT StockTransaction.Id,StockTransaction.Price,StockTransaction.Type,Turn.Turn,Stock.Name,Sector.Name, BankAccountId,Quantity,Stock.CurrentPrice FROM StockTransaction INNER JOIN Turn ON StockTransaction.TurnId=Turn.Id INNER JOIN Stock ON Stock.Id=StockTransaction.StockId INNER JOIN Sector ON Sector.Id=Stock.SectorId WHERE BankAccountId='" + bankId + "' AND Type= 2";
+            rs = DB.fetch(searchQry);
+            while (rs.next()) {
+                StockTransaction StockTransaction = new StockTransaction();
+                StockTransaction.Id = rs.getInt(1);
+                StockTransaction.Price = rs.getDouble(2);
+                StockTransaction.Type = rs.getInt(3);
+                StockTransaction.TurnNo = rs.getInt(4);
+                StockTransaction.StockName = rs.getString(5);
+                StockTransaction.SectorName = rs.getString(6);
+                StockTransaction.BankAccountName = rs.getString(7);
+                StockTransaction.Quantity = rs.getInt(8);
+                StockTransaction.CurrentPrice = rs.getInt(9);
+                stockTransactionList.add(StockTransaction);
+            }
+
+        } catch (Exception e) {
+
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+
+        return stockTransactionList;
+    }
+
+    public ArrayList<StockTransaction> GetHistory(int bankAccoundId) {
+        ArrayList<StockTransaction> StockTransactionList = new ArrayList<StockTransaction>();
+        ResultSet rs = null;
+        try {
+            double currentPrice = 0;
+            String searchQry = "SELECT Stock.Name, StockTransaction.Type,StockTransaction.Quantity,StockTransaction.Price FROM StockTransaction Inner Join Stock ON Stock.Id = StockTransaction.StockId WHERE BankAccountId='" + bankAccoundId + "'";
+            rs = DB.fetch(searchQry);
+            while (rs.next()) {
+                StockTransaction stockTransactionViewModel = new StockTransaction();
+                stockTransactionViewModel.StockName = rs.getString(1);
+                stockTransactionViewModel.Type = rs.getInt(2);
+                stockTransactionViewModel.Quantity = rs.getInt(3);
+                stockTransactionViewModel.Price = rs.getDouble(4);
+                StockTransactionList.add(stockTransactionViewModel);
+            }
+            rs.close();
+
+        } catch (Exception e) {
+
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+        return StockTransactionList;
+    }
+
     public List<Stock> GetBySectorId(int sectorId) {
         ArrayList<Stock> stockViewModelList = new ArrayList<Stock>();
         ResultSet rs = null;

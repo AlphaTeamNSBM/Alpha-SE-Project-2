@@ -8,4 +8,6 @@ package Controllers;
 public class LoginResponce {
     public int BankAccountId;
     public String BrokerId;
+    public int TurnId;
+    public int Turn;
 }

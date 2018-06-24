@@ -99,11 +99,11 @@ public class BankAccountResource {
                     BankAccount bankAccountViewModel = bankR.Create(requestBody);
                     return Response.ok(bankAccountViewModel).header("Access-Control-Allow-Origin", "*").build();
                 } else {
-                    return Response.status(Response.Status.BAD_REQUEST).entity("User name already exsit: " + requestBody.UserName).header("Access-Control-Allow-Origin", "*").build();
+                    return Response.status(Response.Status.BAD_REQUEST).entity("User name already exsit").header("Access-Control-Allow-Origin", "*").build();
                 }
 
             } else {
-                return Response.status(Response.Status.BAD_REQUEST).entity("Player name already exsit: " + requestBody.PlayerName).header("Access-Control-Allow-Origin", "*").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Player name already exsit").header("Access-Control-Allow-Origin", "*").build();
             }
 
         } catch (Exception e) {

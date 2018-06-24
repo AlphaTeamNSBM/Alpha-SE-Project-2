@@ -1,0 +1,148 @@
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="card mb-3">
+                    <div class="card-header">
+                         Sell stocks
+                    </div>
+                    <div class="card-body">
+                        <form [formGroup]="sellForm">
+
+                            <div class="form-group">
+                                <label for="price">Stock</label>
+                                <select id="Sector" class="form-control col-sm-4" formControlName="stock" [(ngModel)]="sellingStockId" (ngModelChange)="getSelectedSectorForSell($event)">
+                                    <option *ngFor="let buying of stockTransactionList" [ngValue]="buying.Id">{{buying.StockName}}</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="alterEgo" style="font-size:40px;color:red;font-weight:bold;">Purches Price:   </label><label style="font-size:30px;color:blue;" for="alterEgo">     {{sellingItemBotPrice}}</label>
+                            </div>
+                            <div class="form-group">
+                                <label for="alterEgo" style="font-size:40px;color:red;font-weight:bold;">Bought Quantity:   </label><label style="font-size:30px;color:blue;" for="alterEgo">     {{sellingBotQty}}</label>
+                            </div>
+                            <div class="form-group">
+                                <label for="Quantity">Quantity</label>
+                                <input type="number" [(ngModel)]="sellingQty" formControlName="qty" class="form-control col-sm-4" id="name" required>
+                                <small *ngIf="sellingQtyError !=''" class="text-danger">
+                                    {{sellingQtyError}}
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="price">Selling price</label>
+                                <input type="number" [(ngModel)]="sellingPrice" formControlName="price" class="form-control col-sm-4" id="name" required>
+                                <small *ngIf="sellingPriceError !=''" class="text-danger">
+                                    {{sellingPriceError}}
+                                </small>
+                            </div>
+                            <button type="submit" class="btn btn-success" (click)="sell()">Sell</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header">
+                       Buy stocks
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <form [formGroup]="buyForm">
+                                    <div class="form-group">
+                                        <label for="price">Sector</label>
+                                        <select id="Sector" class="form-control col-sm-4" formControlName="sector" [(ngModel)]="selectedBuySectorId" (ngModelChange)="getStockBySectorId($event)">
+                                            <option *ngFor="let sector of sectorList" [ngValue]="sector.Id">{{sector.Name}}</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="price">Stock</label>
+                                        <select id="Sector" class="form-control col-sm-4" formControlName="stock" [(ngModel)]="selectedBuyStockId" (ngModelChange)="getSelectedStockPrice($event)">
+                                            <option *ngFor="let buying of buyingItemList" [ngValue]="buying.Id">{{buying.Name}}</option>
+                                        </select>
+                                    </div>
+                                 
+
+                                    <div class="form-group">
+                                        <label for="Sector" class="control-label col-sm-2 customorderLable">Quantity</label>
+                                        <input type="number" class="form-control col-sm-4" [(ngModel)]="buyingQty" formControlName="qty" name="buyingQty" id="buyingQty" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="alterEgo" style="font-size:40px;color:red;font-weight:bold;">Price:   </label><label style="font-size:30px;color:blue;" for="alterEgo">     {{buyItemPrice}}</label>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success" (click)="buy()">Buy</button>
+                                    <small *ngIf="buyingError !=''" class="text-danger">
+                                        {{buyingError}}
+                                    </small>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card mb-3">
+                    <div class="card-header">
+                       Transaction History
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive"  style="overflow-y:auto;height:300px">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Stock Name</th>
+                                        <th>Quantity</th>
+                                        <th>Bought / Sold</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                              
+                                <tbody>
+                                    <tr *ngFor="let transactionHistory of transactionHistoryList; let rowIndex=index">
+                                        <td [innerHTML]="transactionHistory.StockName"></td>
+                                        <td [innerHTML]="transactionHistory.Quantity"></td>
+                                        <td><span *ngIf="transactionHistory.Type == 1">Sold</span><span *ngIf="transactionHistory.Type == 2">Bought</span></td>
+                                        <td [innerHTML]="transactionHistory.Price" class="text-right"></td>
+                                    </tr>
+                                    <tr *ngIf="transactionHistoryList.length < 1">
+                                        <td colspan="3" class="text-center">
+                                            Not Found
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Current bank info
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label for="Sector" class="control-label">Current bank balance: {{currentBankInfo.CurrentBaniBalance}}</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label for="Sector" class="control-label">Total of bought item: {{currentBankInfo.TotalBoughtItem}}</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label for="Sector" class="control-label">Total of sold item: {{currentBankInfo.TotalSoldItem}}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+>

@@ -1,0 +1,67 @@
+<div class="card register mx-auto  mt-5">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Register user and broker
+                    </div>
+                    <div class="card-body">
+                        <form [formGroup]="testForm">
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" class="form-control" [(ngModel)]="bankAccount.PlayerName" formControlName="name" id="name" required>
+                                <small [hidden]="testForm.controls.name.valid || (testForm.controls.name.pristine && !submitted)" class="text-danger">
+                                    Name is required and cannot be duplicate.
+                                </small>
+                            </div>
+                            <div class="form-group">
+                                <label for="alterEgo">Account Number</label>
+                                <input type="text" class="form-control" [(ngModel)]="bankAccount.AccountNumber" formControlName="accountno" id="Account" disabled required>
+                                <small [hidden]="testForm.controls.accountno.valid || (testForm.controls.accountno.pristine && !submitted)" class="text-danger">
+                                    Bank account number is required.
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">User Name</label>
+                                <input type="text" class="form-control" id="Username" [(ngModel)]="bankAccount.UserName" formControlName="username" required>
+                                <small [hidden]="testForm.controls.username.valid || (testForm.controls.username.pristine && !submitted)" class="text-danger">
+                                    User name is required.
+                                </small>
+                            </div>
+                            <div class="form-group">
+                                <label for="Password">Password</label>
+                                <input type="password" class="form-control" id="Password" [(ngModel)]="bankAccount.Password" formControlName="password" required>
+                                <small [hidden]="testForm.controls.password.valid || (testForm.controls.password.pristine && !submitted)" class="text-danger">
+                                    Password is mandatory.
+                                </small>
+                                <small *ngIf="!match" class="text-danger">
+                                    Password is not match.
+                                </small>
+                            </div>
+                            <div class="form-group">
+                                <label for="Password">Confirm password</label>
+                                <input type="password" class="form-control" id="Password2" [(ngModel)]="bankAccount.Password2" formControlName="password2" required>
+                                <small [hidden]="testForm.controls.password2.valid || (testForm.controls.password2.pristine && !submitted)" class="text-danger">
+                                    Password is not match.
+                                </small>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success" (click)="save(testForm.value, testForm.valid)">Create</button>
+                <small *ngIf="error != ''" class="text-danger">
+                    {{error}}
+                </small>
+                <div class="clearfix">
+                </div>
+              
+                <div class="clearfix">
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+</div>

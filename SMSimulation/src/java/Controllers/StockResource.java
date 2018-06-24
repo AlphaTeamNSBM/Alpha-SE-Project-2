@@ -16,7 +16,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-
 @Path("Stock")
 public class StockResource {
 
@@ -42,11 +41,53 @@ public class StockResource {
     }
 
     @GET
+    @Path("sell")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response Sell(@QueryParam("stockTransactionId") int stockTransactionId, @QueryParam("qty") int qty, @QueryParam("sellingPrice") double sellingPrice, @QueryParam("turnId") int turnId, @QueryParam("bankAccoundId") int bankAccoundId) {
+        StockService r = new StockService();
+        r.SellItem(stockTransactionId, qty, sellingPrice, turnId, bankAccoundId);
+        return Response.ok().header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    @GET
+    @Path("getCurrentTurn")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCurrentTurn() {
+        StockService r = new StockService();
+        return Response.ok(r.getCurrentTurn()).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    @GET
+    @Path("buy")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response Buy(@QueryParam("stockId") int stockId, @QueryParam("qty") int qty, @QueryParam("turnId") int turnId, @QueryParam("bankAccoundId") int bankAccoundId) {
+        StockService r = new StockService();
+        r.BuyItem(qty, stockId, turnId, bankAccoundId);
+        return Response.ok().header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    @GET
     @Path("/GetBySectorId")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getBySectorId(@QueryParam("sectorId") int sectorId) {
         StockService sr = new StockService();
         return Response.ok(sr.GetBySectorId(sectorId), MediaType.APPLICATION_JSON).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    @GET
+    @Path("/GetSoldItem")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getSoldItem(@QueryParam("bankId") int bankId, @QueryParam("bankId") int roundId) {
+        StockService r = new StockService();
+        return Response.ok(r.GetSellingItem(bankId), MediaType.APPLICATION_JSON).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    @GET
+    @Path("History")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response GetHistory(@QueryParam("bankAccoundId") int bankAccoundId) {
+        StockService r = new StockService();
+        return Response.ok(r.GetHistory(bankAccoundId), MediaType.APPLICATION_JSON).header("Access-Control-Allow-Origin", "*").build();
     }
 
     /**

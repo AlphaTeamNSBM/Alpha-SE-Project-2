@@ -1,4 +1,3 @@
-
 package Controllers;
 
 import Controllers.DB;
@@ -26,6 +25,9 @@ public class BankAccountService {
             rs = DB.fetch(selectQry);
 
             while (rs.next()) {
+                String insertQry2 = "INSERT INTO Broker(BankAccountId) values ('" + rs.getInt(1) + "')";
+                isSaved = DB.save(insertQry2);
+
                 bankAccountViewModel.Id = rs.getInt(1);
                 bankAccountViewModel.PlayerName = rs.getString(2);
                 bankAccountViewModel.AccountNumber = Integer.parseInt(rs.getString(3));
@@ -210,6 +212,30 @@ public class BankAccountService {
                 vm.BankAccountId = rs.getInt(1);
                 vm.BrokerId = rs.getString(2);
             }
+            rs.close();
+
+            String selectQry2 = "SELECT * FROM Turn where (select MAX(Id) from Turn)";
+            rs = DB.fetch(selectQry2);
+
+            while (rs.next()) {
+                vm.TurnId = rs.getInt(1);
+                vm.Turn = rs.getInt(2);
+            }
+            rs.close();
+
+            if (vm.Turn == 20) {
+                String insertQry = "INSERT INTO Turn(Turn) values ('1')";
+                DB.save(insertQry);
+            }
+
+            String selectQry3 = "SELECT * FROM Turn where (select MAX(Id) from Turn)";
+            rs = DB.fetch(selectQry3);
+
+            while (rs.next()) {
+                vm.TurnId = rs.getInt(1);
+                vm.Turn = rs.getInt(2);
+            }
+            rs.close();
 
         } catch (Exception e) {
 

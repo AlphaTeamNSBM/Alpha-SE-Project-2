@@ -10,11 +10,17 @@ package Controllers;
  * @author lakshan
  */
 public class StockTransaction {
-       public int Id;
+    public int Id;
     public double Price;
     public int Type;
     public int TurnId;
     public int BankAccountId;
     public int StockId;
     public int Quantity;
+    public int TurnNo;
+    public String BankAccountName;
+    public String StockName;
+    public String SectorName;
+    public double CurrentPrice;
+
 }
