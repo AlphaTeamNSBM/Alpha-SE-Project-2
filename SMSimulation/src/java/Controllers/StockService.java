@@ -18,6 +18,41 @@ import java.util.logging.Logger;
 
 public class StockService {
 
+    
+    public ArrayList<AnalystViewModel> GetPredicate() {
+        ArrayList<AnalystViewModel> analystViewModelList = new ArrayList<AnalystViewModel>();
+        ResultSet rs = null;
+        try {
+            String selectQry = "SELECT Id, Name, CurrentPrice from Stock";
+            rs = DB.fetch(selectQry);
+            while (rs.next()) {
+                AnalystViewModel analystViewModel = new AnalystViewModel();
+                analystViewModel.Id = rs.getInt(1);
+                analystViewModel.Name = rs.getString(2);
+                analystViewModel.CurrentPrice = rs.getString(3);
+                analystViewModelList.add(analystViewModel);
+            }
+            rs.close();
+            for (int i = 0; i < analystViewModelList.size(); i++) {
+                AnalystViewModel analystViewModel = analystViewModelList.get(i);
+                List<Integer> numbers = new ArrayList<Integer>();
+                String selectQry2 = "SELECT price from StockPriceHistory Where StockId = '" + analystViewModel.Id + "'";
+                rs = DB.fetch(selectQry2);
+                while (rs.next()) {
+                    numbers.add(rs.getInt(1));
+                }
+                analystViewModel.valus = numbers;
+                rs.close();
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+        return analystViewModelList;
+    }
+
+    
     public boolean Create(Stock vm) {
         boolean isSaved = true;
         try {

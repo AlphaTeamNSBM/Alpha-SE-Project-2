@@ -57,6 +57,15 @@ public class StockResource {
         return Response.ok(r.getCurrentTurn()).header("Access-Control-Allow-Origin", "*").build();
     }
 
+    
+    @GET
+    @Path("getPredicator")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPredicator() {
+        StockService r = new StockService();
+        return Response.ok(r.GetPredicate()).header("Access-Control-Allow-Origin", "*").build();
+    }
+    
     @GET
     @Path("buy")
     @Produces(MediaType.APPLICATION_JSON)
