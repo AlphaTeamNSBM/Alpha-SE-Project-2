@@ -33,6 +33,7 @@ export class LoginComponent implements OnInit {
             this.service.login(this.login.UserName, this.login.Password)
                 .subscribe((data: LoginResponce) => {
                     localStorage.setItem('isLogin', "1");
+                    this.service.loggedIn = true;
                     localStorage.setItem('BrokerId', data.BrokerId.toString());
                     localStorage.setItem('loginUserId', data.BankAccountId.toString());
                     localStorage.setItem('Turn', data.Turn.toString());
@@ -41,7 +42,7 @@ export class LoginComponent implements OnInit {
                 },
                 (error: any) => {
                     if (error.status === 400) {
-                      
+                      this.error = "User name or password incorrect. please try again";
                     } else {
                        
                     }

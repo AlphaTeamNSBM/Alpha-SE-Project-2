@@ -15,6 +15,7 @@ export class Service {
 
     private baseUrl: string;
     constructor(private http: Http, private router: Router, private constants: Constants) {
+         this.loggedIn = !!localStorage.getItem('isLogin');
         this.baseUrl = constants.url;
     }
 
@@ -24,7 +25,7 @@ export class Service {
     }
 
     getDataForPredicate(): Observable<AnalystModel[]> {
-        return this.http.get(this.baseUrl + "api/Stock" + "/getDataForPredicate")
+        return this.http.get(this.baseUrl + "api/Stock" + "/getPredicator")
             .map(res => (res.json() as AnalystModel[]));
     }
 

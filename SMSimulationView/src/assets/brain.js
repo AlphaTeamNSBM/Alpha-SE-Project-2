@@ -1,3 +1,5 @@
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+// this file is the entrypoint for building a browser file with browserify
 
 brain = require("./lib/brain");
 },{"./lib/brain":2}],2:[function(require,module,exports){
@@ -100,6 +102,8 @@ module.exports = function crossValidate(classifierConst, data, opts, trainOpts, 
 },{"underscore":20}],4:[function(require,module,exports){
 var _ = require("underscore");
 
+/* Functions for turning sparse hashes into arrays and vice versa */
+
 function buildLookup(hashes) {
   // [{a: 1}, {b: 6, c: 7}] -> {a: 0, b: 1, c: 2}
   var hash = _(hashes).reduce(function(memo, hash) {
@@ -128,6 +132,7 @@ function toArray(lookup, hash) {
 }
 
 function toHash(lookup, array) {
+  // {a: 0, b: 1}, [6, 7] -> {a: 6, b: 7}
   var hash = {};
   for (var i in lookup) {
     hash[i] = array[lookup[i]];
@@ -173,13 +178,13 @@ NeuralNetwork.prototype = {
     this.sizes = sizes;
     this.outputLayer = this.sizes.length - 1;
 
-    this.biases = []; 
+    this.biases = []; // weights for bias nodes
     this.weights = [];
     this.outputs = [];
 
     // state for training
     this.deltas = [];
-    this.changes = []; 
+    this.changes = []; // for momentum
     this.errors = [];
 
     for (var layer = 0; layer <= this.outputLayer; layer++) {
@@ -443,7 +448,6 @@ NeuralNetwork.prototype = {
   },
 
   toJSON: function() {
-   
     var layers = [];
     for (var layer = 0; layer <= this.outputLayer; layer++) {
       layers[layer] = {};
@@ -536,7 +540,9 @@ NeuralNetwork.prototype = {
   return output;');
   },
   
-  
+  // This will create a TrainStream (WriteStream)
+  //  for us to send the training data to.
+  //  param: opts - the training options
   createTrainStream: function(opts) {
     opts = opts || {};
     opts.neuralNetwork = this;
@@ -583,7 +589,7 @@ function TrainStream(opts) {
 
   opts = opts || {};
 
- 
+  // require the neuralNetwork
   if (!opts.neuralNetwork) {
     throw new Error('no neural network specified');
   }
@@ -615,6 +621,10 @@ function TrainStream(opts) {
 
 inherits(TrainStream, Writable);
 
+/*
+  _write expects data to be in the form of a datum.
+  ie. {input: {a: 1 b: 0}, output: {z: 0}}
+ */
 TrainStream.prototype._write = function(chunk, enc, next) {
   if (!chunk) { // check for the end of one interation of the stream
     this.emit('finish');
@@ -634,7 +644,7 @@ TrainStream.prototype._write = function(chunk, enc, next) {
   var data = this.neuralNetwork.formatData(chunk);
   this.trainDatum(data[0]);
 
- 
+  // tell the Readable Stream that we are ready for more data
   next();
 }
 
@@ -704,7 +714,14 @@ TrainStream.prototype.finishStreamIteration = function() {
   }
 }
 },{"./lookup":4,"inherits":19,"stream":12,"underscore":20}],6:[function(require,module,exports){
-
+/**
+ * The buffer module from node.js, for the browser.
+ *
+ * Author:   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * License:  MIT
+ *
+ * `npm install buffer`
+ */
 
 var base64 = require('base64-js')
 var ieee754 = require('ieee754')
@@ -714,12 +731,11 @@ exports.SlowBuffer = Buffer
 exports.INSPECT_MAX_BYTES = 50
 Buffer.poolSize = 8192
 
+
 Buffer._useTypedArrays = (function () {
- 
   if (typeof Uint8Array !== 'function' || typeof ArrayBuffer !== 'function')
     return false
 
- 
   try {
     var arr = new Uint8Array(0)
     arr.foo = function () { return 42 }
@@ -730,15 +746,12 @@ Buffer._useTypedArrays = (function () {
   }
 })()
 
-
 function Buffer (subject, encoding, noZero) {
   if (!(this instanceof Buffer))
     return new Buffer(subject, encoding, noZero)
 
   var type = typeof subject
 
-  // Workaround: node's base64 implementation allows for non-padded strings
-  // while base64-js does not.
   if (encoding === 'base64' && type === 'string') {
     subject = stringtrim(subject)
     while (subject.length % 4 !== 0) {
@@ -791,9 +804,6 @@ function Buffer (subject, encoding, noZero) {
 
   return buf
 }
-
-// STATIC METHODS
-// ==============
 
 Buffer.isEncoding = function (encoding) {
   switch (String(encoding).toLowerCase()) {
@@ -877,9 +887,6 @@ Buffer.concat = function (list, totalLength) {
   return buf
 }
 
-// BUFFER INSTANCE METHODS
-// =======================
-
 function _hexWrite (buf, string, offset, length) {
   offset = Number(offset) || 0
   var remaining = buf.length - offset
@@ -937,8 +944,6 @@ function _utf16leWrite (buf, string, offset, length) {
 }
 
 Buffer.prototype.write = function (string, offset, length, encoding) {
-  // Support both (string, offset, length, encoding)
-  // and the legacy (string, encoding, offset, length)
   if (isFinite(offset)) {
     if (!isFinite(length)) {
       encoding = length
@@ -1576,11 +1581,6 @@ Buffer.prototype.inspect = function () {
   }
   return '<Buffer ' + out.join(' ') + '>'
 }
-
-/**
- * Creates a new `ArrayBuffer` with the *copied* memory of the buffer instance.
- * Added in Node 0.12. Only available in browsers that support ArrayBuffer.
- */
 Buffer.prototype.toArrayBuffer = function () {
   if (typeof Uint8Array === 'function') {
     if (Buffer._useTypedArrays) {
@@ -1596,27 +1596,17 @@ Buffer.prototype.toArrayBuffer = function () {
   }
 }
 
-// HELPER FUNCTIONS
-// ================
-
 function stringtrim (str) {
   if (str.trim) return str.trim()
   return str.replace(/^\s+|\s+$/g, '')
 }
 
 var BP = Buffer.prototype
-
-/**
- * Augment the Uint8Array *instance* (not the class!) with Buffer methods
- */
 function augment (arr) {
   arr._isBuffer = true
-
-  // save reference to original Uint8Array get/set methods before overwriting
   arr._get = arr.get
   arr._set = arr.set
 
-  // deprecated, will be removed in node 0.13+
   arr.get = BP.get
   arr.set = BP.set
 
@@ -1673,7 +1663,6 @@ function clamp (index, len, defaultValue) {
 }
 
 function coerce (length) {
-  
   length = ~~Math.ceil(+length)
   return length < 0 ? 0 : length
 }
@@ -1715,7 +1704,6 @@ function utf8ToBytes (str) {
 function asciiToBytes (str) {
   var byteArray = []
   for (var i = 0; i < str.length; i++) {
-    // Node's code seems to be doing this and not & 0x7F..
     byteArray.push(str.charCodeAt(i) & 0xFF)
   }
   return byteArray
@@ -1756,7 +1744,6 @@ function decodeUtf8Char (str) {
     return String.fromCharCode(0xFFFD) // UTF 8 invalid char
   }
 }
-
 function verifuint (value, max) {
   assert(typeof value === 'number', 'cannot write a non-number as a number')
   assert(value >= 0, 'specified a negative value for writing an unsigned value')
@@ -1821,7 +1808,11 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
       throw new Error('Invalid string. Length must be a multiple of 4')
     }
 
-    
+    // the number of equal signs (place holders)
+    // if there are two placeholders, than the two characters before it
+    // represent one byte
+    // if there is only one, then the three characters before it represent 2 bytes
+    // this is just a cheap hack to not do indexOf twice
     var len = b64.length
     placeHolders = '=' === b64.charAt(len - 2) ? 2 : '=' === b64.charAt(len - 1) ? 1 : 0
 
@@ -1994,13 +1985,18 @@ function EventEmitter() {
 }
 module.exports = EventEmitter;
 
+// Backwards-compat with node 0.10.x
 EventEmitter.EventEmitter = EventEmitter;
 
 EventEmitter.prototype._events = undefined;
 EventEmitter.prototype._maxListeners = undefined;
 
+// By default EventEmitters will print a warning if more than 10 listeners are
+// added to it. This is a useful default which helps finding memory leaks.
 EventEmitter.defaultMaxListeners = 10;
 
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
 EventEmitter.prototype.setMaxListeners = function(n) {
   if (!isNumber(n) || n < 0 || isNaN(n))
     throw TypeError('n must be a positive number');
@@ -2320,6 +2316,7 @@ process.chdir = function (dir) {
 
 },{}],11:[function(require,module,exports){
 
+
 module.exports = Duplex;
 var inherits = require('inherits');
 var setImmediate = require('process/browser.js').nextTick;
@@ -2382,8 +2379,13 @@ Stream.Duplex = require('./duplex.js');
 Stream.Transform = require('./transform.js');
 Stream.PassThrough = require('./passthrough.js');
 
+// Backwards-compat with node 0.4.x
 Stream.Stream = Stream;
 
+
+
+// old-style streams.  Note that the pipe method (the only relevant
+// part of this class) is overridden in the Readable class.
 
 function Stream() {
   EE.call(this);
@@ -2410,6 +2412,8 @@ Stream.prototype.pipe = function(dest, options) {
 
   dest.on('drain', ondrain);
 
+  // If the 'end' option is not supplied, dest.end() will be called when
+  // source gets the 'end' or 'close' events.  Only dest.end() once.
   if (!dest._isStdio && (!options || options.end !== false)) {
     source.on('end', onend);
     source.on('close', onclose);
@@ -2495,6 +2499,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
 },{"./transform.js":16,"inherits":19}],15:[function(require,module,exports){
 (function (process){
 
+
 module.exports = Readable;
 Readable.ReadableState = ReadableState;
 
@@ -2510,6 +2515,8 @@ inherits(Readable, Stream);
 function ReadableState(options, stream) {
   options = options || {};
 
+  // the point at which it stops calling _read() to fill the buffer
+  // Note: 0 is a valid value, means "don't call _read preemptively ever"
   var hwm = options.highWaterMark;
   this.highWaterMark = (hwm || hwm === 0) ? hwm : 16 * 1024;
 
@@ -2525,23 +2532,42 @@ function ReadableState(options, stream) {
   this.endEmitted = false;
   this.reading = false;
 
+  // In streams that never have any data, and do push(null) right away,
+  // the consumer can miss the 'end' event if they do some I/O before
+  // consuming the stream.  So, we don't emit('end') until some reading
+  // happens.
   this.calledRead = false;
 
+  // a flag to be able to tell if the onwrite cb is called immediately,
+  // or on a later tick.  We set this to true at first, becuase any
+  // actions that shouldn't happen until "later" should generally also
+  // not happen before the first write call.
   this.sync = true;
 
+  // whenever we return null, then we set a flag to say
+  // that we're awaiting a 'readable' event emission.
   this.needReadable = false;
   this.emittedReadable = false;
   this.readableListening = false;
 
 
+  // object stream flag. Used to make read(n) ignore n and to
+  // make all the buffer merging and length checks go away
   this.objectMode = !!options.objectMode;
 
+  // Crypto is kind of old and crusty.  Historically, its default string
+  // encoding is 'binary' so we have to make this configurable.
+  // Everything else in the universe uses 'utf8', though.
   this.defaultEncoding = options.defaultEncoding || 'utf8';
 
+  // when piping, we only care about 'readable' events that happen
+  // after read()ing all the bytes and not getting any pushback.
   this.ranOut = false;
 
+  // the number of writers that are awaiting a drain event in .pipe()s
   this.awaitDrain = 0;
 
+  // if true, a maybeReadMore has been scheduled
   this.readingMore = false;
 
   this.decoder = null;
@@ -2566,6 +2592,10 @@ function Readable(options) {
   Stream.call(this);
 }
 
+// Manually shove something into the read() buffer.
+// This returns true if the highWaterMark has not been hit yet,
+// similar to how Writable.write() returns true if you should
+// write() some more.
 Readable.prototype.push = function(chunk, encoding) {
   var state = this._readableState;
 
@@ -2626,6 +2656,13 @@ function readableAddChunk(stream, state, chunk, encoding, addToFront) {
   return needMoreData(state);
 }
 
+// if it's past the high water mark, we can push in some more.
+// Also, if we have no data yet, we can stand some
+// more bytes.  This is to work around cases where hwm=0,
+// such as the repl.  Also, if the push() triggered a
+// readable event, and the user called read(largeNumber) such that
+// needReadable was set, then we ought to push more, so that another
+// 'readable' event will be triggered.
 function needMoreData(state) {
   return !state.ended &&
          (state.needReadable ||
@@ -2673,6 +2710,10 @@ function howMuchToRead(n, state) {
   if (n <= 0)
     return 0;
 
+  // If we're asking for more than the target buffer level,
+  // then raise the water mark.  Bump up to the next highest
+  // power of 2, to prevent increasing it excessively in tiny
+  // amounts.
   if (n > state.highWaterMark)
     state.highWaterMark = roundUpToNextPowerOf2(n);
 
@@ -2688,6 +2729,7 @@ function howMuchToRead(n, state) {
   return n;
 }
 
+// you can override either this method, or the async _read(n) below.
 Readable.prototype.read = function(n) {
   var state = this._readableState;
   state.calledRead = true;
@@ -2696,6 +2738,9 @@ Readable.prototype.read = function(n) {
   if (typeof n !== 'number' || n > 0)
     state.emittedReadable = false;
 
+  // if we're doing read(0) to trigger a readable event, but we
+  // already have a bunch of data in the buffer, then just trigger
+  // the 'readable' event and move on.
   if (n === 0 &&
       state.needReadable &&
       (state.length >= state.highWaterMark || state.ended)) {
@@ -2712,18 +2757,44 @@ Readable.prototype.read = function(n) {
     return null;
   }
 
+  // All the actual chunk generation logic needs to be
+  // *below* the call to _read.  The reason is that in certain
+  // synthetic stream cases, such as passthrough streams, _read
+  // may be a completely synchronous operation which may change
+  // the state of the read buffer, providing enough data when
+  // before there was *not* enough.
+  //
+  // So, the steps are:
+  // 1. Figure out what the state of things will be after we do
+  // a read from the buffer.
+  //
+  // 2. If that resulting state will trigger a _read, then call _read.
+  // Note that this may be asynchronous, or synchronous.  Yes, it is
+  // deeply ugly to write APIs this way, but that still doesn't mean
+  // that the Readable class should behave improperly, as streams are
+  // designed to be sync/async agnostic.
+  // Take note if the _read call is sync or async (ie, if the read call
+  // has returned yet), so that we know whether or not it's safe to emit
+  // 'readable' etc.
+  //
+  // 3. Actually pull the requested chunks out of the buffer and return.
+
+  // if we need a readable event, then we need to do some reading.
   var doRead = state.needReadable;
 
+  // if we currently have less than the highWaterMark, then also read some
   if (state.length - n <= state.highWaterMark)
     doRead = true;
 
+  // however, if we've ended, then there's no point, and if we're already
+  // reading, then it's unnecessary.
   if (state.ended || state.reading)
     doRead = false;
 
   if (doRead) {
     state.reading = true;
     state.sync = true;
-    
+    // if the length is currently zero, then we *need* a readable event.
     if (state.length === 0)
       state.needReadable = true;
     // call internal read method
@@ -2731,6 +2802,9 @@ Readable.prototype.read = function(n) {
     state.sync = false;
   }
 
+  // If _read called its callback synchronously, then `reading`
+  // will be false, and we need to re-evaluate how much data we
+  // can return to the user.
   if (doRead && !state.reading)
     n = howMuchToRead(nOrig, state);
 
@@ -2747,9 +2821,14 @@ Readable.prototype.read = function(n) {
 
   state.length -= n;
 
+  // If we have nothing in the buffer, then we want to know
+  // as soon as we *do* get something into the buffer.
   if (state.length === 0 && !state.ended)
     state.needReadable = true;
 
+  // If we happened to read() exactly the remaining amount in the
+  // buffer, and the EOF has been seen at this point, then make sure
+  // that we emit 'end' on the very next tick.
   if (state.ended && !state.endEmitted && state.length === 0)
     endReadable(this);
 
@@ -2780,12 +2859,17 @@ function onEofChunk(stream, state) {
   }
   state.ended = true;
 
+  // if we've ended and we have some data left, then emit
+  // 'readable' now to make sure it gets picked up.
   if (state.length > 0)
     emitReadable(stream);
   else
     endReadable(stream);
 }
 
+// Don't emit readable right away in sync mode, because this can trigger
+// another read() call => stack overflow.  This way, it might trigger
+// a nextTick recursion warning, but that's not so bad.
 function emitReadable(stream) {
   var state = stream._readableState;
   state.needReadable = false;
@@ -2806,6 +2890,12 @@ function emitReadable_(stream) {
 }
 
 
+// at this point, the user has presumably seen the 'readable' event,
+// and called read() to consume some data.  that may have triggered
+// in turn another _read(n) call, in which case reading = true if
+// it's in progress.
+// However, if we're not ended, or reading, and the length < hwm,
+// then go ahead and try to read some more preemptively.
 function maybeReadMore(stream, state) {
   if (!state.readingMore) {
     state.readingMore = true;
@@ -2829,6 +2919,10 @@ function maybeReadMore_(stream, state) {
   state.readingMore = false;
 }
 
+// abstract method.  to be overridden in specific implementation classes.
+// call cb(er, data) where data is <= n in length.
+// for virtual (non-string, non-buffer) streams, "length" is somewhat
+// arbitrary, and perhaps not very meaningful.
 Readable.prototype._read = function(n) {
   this.emit('error', new Error('not implemented'));
 };
@@ -2870,6 +2964,10 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     dest.end();
   }
 
+  // when the dest drains, it reduces the awaitDrain counter
+  // on the source.  This would be more elegant with a .once()
+  // handler in flow(), but adding and removing repeatedly is
+  // too slow.
   var ondrain = pipeOnDrain(src);
   dest.on('drain', ondrain);
 
@@ -2883,10 +2981,18 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     src.removeListener('end', onend);
     src.removeListener('end', cleanup);
 
+    // if the reader is waiting for a drain event from this
+    // specific writer, then it would cause it to never start
+    // flowing again.
+    // So, if this is awaiting a drain, then we just call it now.
+    // If we don't know, then assume that we are waiting for one.
     if (!dest._writableState || dest._writableState.needDrain)
       ondrain();
   }
 
+  // if the dest has an error, then stop piping into it.
+  // however, don't suppress the throwing behavior for this.
+  // check for listeners before emit removes one-time listeners.
   var errListeners = EE.listenerCount(dest, 'error');
   function onerror(er) {
     unpipe();
@@ -2895,6 +3001,7 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
   }
   dest.once('error', onerror);
 
+  // Both close and finish should trigger unpipe, but only once.
   function onclose() {
     dest.removeListener('finish', onfinish);
     unpipe();
@@ -2915,7 +3022,10 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
 
   // start the flow if it hasn't been started already.
   if (!state.flowing) {
-   
+    // the handler that waits for readable events after all
+    // the data gets sucked out in flow.
+    // This would be easier to follow with a .once() handler
+    // in flow(), but that is too slow.
     this.on('readable', pipeOnReadable);
 
     state.flowing = true;
@@ -2963,6 +3073,10 @@ function flow(src) {
       return;
   }
 
+  // if every destination was unpiped, either before entering this
+  // function, or in the while loop, then stop flowing.
+  //
+  // NB: This is a pretty rare edge case.
   if (state.pipesCount === 0) {
     state.flowing = false;
 
@@ -2972,6 +3086,8 @@ function flow(src) {
     return;
   }
 
+  // at this point, no one needed a drain, so we just ran out of data
+  // on the next readable event, start it over again.
   state.ranOut = true;
 }
 
@@ -3083,7 +3199,6 @@ function emitDataEvents(stream, startPaused) {
   var state = stream._readableState;
 
   if (state.flowing) {
-  
     throw new Error('Cannot switch to old mode now.');
   }
 
@@ -3128,6 +3243,9 @@ function emitDataEvents(stream, startPaused) {
   stream.emit('readable');
 }
 
+// wrap an old-style stream as the async data source.
+// This is *not* part of the readable stream interface.
+// It is an ugly unfortunate mess of history.
 Readable.prototype.wrap = function(stream) {
   var state = this._readableState;
   var paused = false;
@@ -3295,6 +3413,7 @@ function indexOf (xs, x) {
 }).call(this,require("/Users/harth/repos/brain/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
 },{"./index.js":12,"/Users/harth/repos/brain/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":10,"buffer":6,"events":9,"inherits":19,"process/browser.js":13,"string_decoder":18}],16:[function(require,module,exports){
 
+
 module.exports = Transform;
 
 var Duplex = require('./duplex.js');
@@ -3391,6 +3510,9 @@ Transform.prototype._write = function(chunk, encoding, cb) {
   }
 };
 
+// Doesn't matter what the args are here.
+// _transform does all the work.
+// That we got here means that the readable side wants more data.
 Transform.prototype._read = function(n) {
   var ts = this._transformState;
 
@@ -3398,7 +3520,8 @@ Transform.prototype._read = function(n) {
     ts.transforming = true;
     this._transform(ts.writechunk, ts.writeencoding, ts.afterTransform);
   } else {
-  
+    // mark that we need a transform, so that any data that comes in
+    // will get processed, now that we've asked for it.
     ts.needTransform = true;
   }
 };
@@ -3424,6 +3547,7 @@ function done(stream, er) {
 }
 
 },{"./duplex.js":11,"inherits":19}],17:[function(require,module,exports){
+
 
 module.exports = Writable;
 Writable.WritableState = WritableState;
@@ -3478,19 +3602,37 @@ function WritableState(options, stream) {
   // when 'finish' is emitted
   this.finished = false;
 
+  // should we decode strings into buffers before passing to _write?
+  // this is here so that some node-core streams can optimize string
+  // handling at a lower level.
   var noDecode = options.decodeStrings === false;
   this.decodeStrings = !noDecode;
 
+  // Crypto is kind of old and crusty.  Historically, its default string
+  // encoding is 'binary' so we have to make this configurable.
+  // Everything else in the universe uses 'utf8', though.
   this.defaultEncoding = options.defaultEncoding || 'utf8';
 
+  // not an actual buffer we keep track of, but a measurement
+  // of how much we're waiting to get pushed to some underlying
+  // socket or file.
   this.length = 0;
 
+  // a flag to see when we're in the middle of a write.
   this.writing = false;
 
+  // a flag to be able to tell if the onwrite cb is called immediately,
+  // or on a later tick.  We set this to true at first, becuase any
+  // actions that shouldn't happen until "later" should generally also
+  // not happen before the first write call.
   this.sync = true;
 
+  // a flag to know if we're processing previously buffered items, which
+  // may call the _write() callback in the same tick, so that we don't
+  // end up in an overlapped onwrite situation.
   this.bufferProcessing = false;
 
+  // the callback that's passed to _write(chunk,cb)
   this.onwrite = function(er) {
     onwrite(stream, er);
   };
@@ -3533,6 +3675,11 @@ function writeAfterEnd(stream, state, cb) {
   });
 }
 
+// If we get something that is not a buffer, string, null, or undefined,
+// and we're not in objectMode, then that's an error.
+// Otherwise stream chunks are all considered to be of length=1, and the
+// watermarks determine how many objects to keep in the buffer, rather than
+// how many bytes or characters.
 function validChunk(stream, state, chunk, cb) {
   var valid = true;
   if (!Buffer.isBuffer(chunk) &&
@@ -3589,6 +3736,9 @@ function decodeChunk(state, chunk, encoding) {
   return chunk;
 }
 
+// if we're already writing something, then just put this
+// in the queue, and wait our turn.  Otherwise, call _write
+// If we return false, then we need a drain event, so set that flag.
 function writeOrBuffer(stream, state, chunk, encoding, cb) {
   chunk = decodeChunk(state, chunk, encoding);
   var len = state.objectMode ? 1 : chunk.length;
@@ -3667,6 +3817,9 @@ function afterWrite(stream, state, finished, cb) {
     finishMaybe(stream, state);
 }
 
+// Must force callback to be called on nextTick, so that we don't
+// emit 'drain' before the write() consumer gets the 'false' return
+// value, and has a chance to attach a 'drain' listener.
 function onwriteDrain(stream, state) {
   if (state.length === 0 && state.needDrain) {
     state.needDrain = false;
@@ -3688,6 +3841,10 @@ function clearBuffer(stream, state) {
 
     doWrite(stream, state, len, chunk, encoding, cb);
 
+    // if we didn't call the onwrite immediately, then
+    // it means that we need to wait until it does.
+    // also, that means that the chunk and cb are currently
+    // being processed, so move the buffer counter past them.
     if (state.writing) {
       c++;
       break;
@@ -3755,6 +3912,7 @@ function endWritable(stream, state, cb) {
 }
 
 },{"./index.js":12,"buffer":6,"inherits":19,"process/browser.js":13}],18:[function(require,module,exports){
+
 
 var Buffer = require('buffer').Buffer;
 
@@ -3872,8 +4030,6 @@ StringDecoder.prototype.detectIncompleteChar = function(buffer) {
   for (; i > 0; i--) {
     var c = buffer[buffer.length - i];
 
-    // See http://en.wikipedia.org/wiki/UTF-8#Description
-
     // 110XXXXX
     if (i == 1 && c >> 5 == 0x06) {
       this.charLength = 2;
@@ -3954,9 +4110,12 @@ if (typeof Object.create === 'function') {
 
 },{}],20:[function(require,module,exports){
 
-
 (function() {
 
+  // Baseline setup
+  // --------------
+
+  // Establish the root object, `window` in the browser, or `exports` on the server.
   var root = this;
 
   // Save the previous value of the `_` variable.
@@ -4028,8 +4187,6 @@ if (typeof Object.create === 'function') {
     return obj;
   };
 
-  // Return the results of applying the iterator to each element.
-  // Delegates to **ECMAScript 5**'s native `map` if available.
   _.map = _.collect = function(obj, iterator, context) {
     var results = [];
     if (obj == null) return results;
@@ -4042,6 +4199,8 @@ if (typeof Object.create === 'function') {
 
   var reduceError = 'Reduce of empty array with no initial value';
 
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
   _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
     var initial = arguments.length > 2;
     if (obj == null) obj = [];
@@ -4060,6 +4219,9 @@ if (typeof Object.create === 'function') {
     if (!initial) throw new TypeError(reduceError);
     return memo;
   };
+
+  // The right-associative version of reduce, also known as `foldr`.
+  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
   _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
     var initial = arguments.length > 2;
     if (obj == null) obj = [];
@@ -4097,6 +4259,9 @@ if (typeof Object.create === 'function') {
     return result;
   };
 
+  // Return all the elements that pass a truth test.
+  // Delegates to **ECMAScript 5**'s native `filter` if available.
+  // Aliased as `select`.
   _.filter = _.select = function(obj, predicate, context) {
     var results = [];
     if (obj == null) return results;
@@ -4107,12 +4272,16 @@ if (typeof Object.create === 'function') {
     return results;
   };
 
+  // Return all the elements for which a truth test fails.
   _.reject = function(obj, predicate, context) {
     return _.filter(obj, function(value, index, list) {
       return !predicate.call(context, value, index, list);
     }, context);
   };
 
+  // Determine whether all of the elements match a truth test.
+  // Delegates to **ECMAScript 5**'s native `every` if available.
+  // Aliased as `all`.
   _.every = _.all = function(obj, predicate, context) {
     predicate || (predicate = _.identity);
     var result = true;
@@ -4124,6 +4293,9 @@ if (typeof Object.create === 'function') {
     return !!result;
   };
 
+  // Determine if at least one element in the object matches a truth test.
+  // Delegates to **ECMAScript 5**'s native `some` if available.
+  // Aliased as `any`.
   var any = _.some = _.any = function(obj, predicate, context) {
     predicate || (predicate = _.identity);
     var result = false;
@@ -4321,16 +4493,26 @@ if (typeof Object.create === 'function') {
     return slice.call(array, 0, n);
   };
 
+  // Returns everything but the last entry of the array. Especially useful on
+  // the arguments object. Passing **n** will return all the values in
+  // the array, excluding the last N. The **guard** check allows it to work with
+  // `_.map`.
   _.initial = function(array, n, guard) {
     return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
   };
 
+  // Get the last element of an array. Passing **n** will return the last N
+  // values in the array. The **guard** check allows it to work with `_.map`.
   _.last = function(array, n, guard) {
     if (array == null) return void 0;
     if ((n == null) || guard) return array[array.length - 1];
     return slice.call(array, Math.max(array.length - n, 0));
   };
 
+  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
+  // Especially useful on the arguments object. Passing an **n** will return
+  // the rest N values in the array. The **guard**
+  // check allows it to work with `_.map`.
   _.rest = _.tail = _.drop = function(array, n, guard) {
     return slice.call(array, (n == null) || guard ? 1 : n);
   };
@@ -4494,6 +4676,10 @@ if (typeof Object.create === 'function') {
     return range;
   };
 
+  // Function (ahem) Functions
+  // ------------------
+
+  // Reusable constructor function for prototype setting.
   var ctor = function(){};
 
   _.bind = function(func, context) {
@@ -4525,6 +4711,9 @@ if (typeof Object.create === 'function') {
     };
   };
 
+  // Bind a number of an object's methods to that object. Remaining arguments
+  // are the method names to be bound. Useful for ensuring that all callbacks
+  // defined on an object belong to it.
   _.bindAll = function(obj) {
     var funcs = slice.call(arguments, 1);
     if (funcs.length === 0) throw new Error('bindAll must be passed function names');
@@ -4776,7 +4965,6 @@ if (typeof Object.create === 'function') {
   // Internal recursive comparison function for `isEqual`.
   var eq = function(a, b, aStack, bStack) {
     // Identical objects are equal. `0 === -0`, but they aren't identical.
-    // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
     if (a === b) return a !== 0 || 1 / a == 1 / b;
     // A strict comparison is necessary because `null == undefined`.
     if (a == null || b == null) return a === b;
@@ -5089,6 +5277,9 @@ if (typeof Object.create === 'function') {
 
   var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
 
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
   _.template = function(text, data, settings) {
     var render;
     settings = _.defaults({}, settings, _.templateSettings);
@@ -5151,6 +5342,11 @@ if (typeof Object.create === 'function') {
     return _(obj).chain();
   };
 
+  // OOP
+  // ---------------
+  // If Underscore is called as a function, it returns a wrapped object that
+  // can be used OO-style. This wrapper holds altered versions of all the
+  // underscore functions. Wrapped objects may be chained.
 
   // Helper function to continue chaining intermediate results.
   var result = function(obj) {

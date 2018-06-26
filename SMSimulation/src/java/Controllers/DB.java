@@ -16,7 +16,7 @@ public class DB {
     public static Connection conec;
 
     public static Connection makeConnection() throws Exception {
-        String url = "jdbc:sqlite:F:\\4th Year Lectures\\Project 2\\SMSimulation\\StockSimulation.db";
+        String url = "jdbc:sqlite:D:\\Alpha-SE-Project-2\\StockSimulation.db";
         Class.forName("org.sqlite.JDBC").newInstance();
         conec = (Connection) DriverManager.getConnection(url);
         return conec;

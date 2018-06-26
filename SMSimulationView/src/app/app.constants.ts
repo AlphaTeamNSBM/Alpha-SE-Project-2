@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 
 export class Constants {
 
-    url: string = 'http://localhost:32164/SMSimulation/';
+    url: string = 'http://localhost:8080/SMSimulation/';
 
     constructor() {
     }
