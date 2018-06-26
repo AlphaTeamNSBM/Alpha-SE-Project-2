@@ -2,7 +2,7 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="row">
-            <div class="col-sm-8">
+            <div class="col-sm-6">
                 <div class="card mb-3">
                     <div class="card-header">
                          Sell stocks
@@ -42,6 +42,41 @@
                         </form>
                     </div>
                 </div>
+                <div class="card mb-3">
+                    <div class="card-header">
+                       Transaction History
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive"  style="overflow-y:auto;height:300px">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Stock Name</th>
+                                        <th>Quantity</th>
+                                        <th>Bought / Sold</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                              
+                                <tbody>
+                                    <tr *ngFor="let transactionHistory of transactionHistoryList; let rowIndex=index">
+                                        <td [innerHTML]="transactionHistory.StockName"></td>
+                                        <td [innerHTML]="transactionHistory.Quantity"></td>
+                                        <td><span *ngIf="transactionHistory.Type == 1">Sold</span><span *ngIf="transactionHistory.Type == 2">Bought</span></td>
+                                        <td [innerHTML]="transactionHistory.Price" class="text-right"></td>
+                                    </tr>
+                                    <tr *ngIf="transactionHistoryList.length < 1">
+                                        <td colspan="3" class="text-center">
+                                            Not Found
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
                 <div class="card mb-3">
                     <div class="card-header">
                        Buy stocks
@@ -84,44 +119,10 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-sm-4">
+
                 <div class="card mb-3">
                     <div class="card-header">
-                       Transaction History
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive"  style="overflow-y:auto;height:300px">
-                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                <thead>
-                                    <tr>
-                                        <th>Stock Name</th>
-                                        <th>Quantity</th>
-                                        <th>Bought / Sold</th>
-                                        <th>Price</th>
-                                    </tr>
-                                </thead>
-                              
-                                <tbody>
-                                    <tr *ngFor="let transactionHistory of transactionHistoryList; let rowIndex=index">
-                                        <td [innerHTML]="transactionHistory.StockName"></td>
-                                        <td [innerHTML]="transactionHistory.Quantity"></td>
-                                        <td><span *ngIf="transactionHistory.Type == 1">Sold</span><span *ngIf="transactionHistory.Type == 2">Bought</span></td>
-                                        <td [innerHTML]="transactionHistory.Price" class="text-right"></td>
-                                    </tr>
-                                    <tr *ngIf="transactionHistoryList.length < 1">
-                                        <td colspan="3" class="text-center">
-                                            Not Found
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="card mb-3">
-                    <div class="card-header">
-                        Current bank info
+                        Bank info
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -129,16 +130,7 @@
                                 <label for="Sector" class="control-label">Current bank balance: {{currentBankInfo.CurrentBaniBalance}}</label>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <label for="Sector" class="control-label">Total of bought item: {{currentBankInfo.TotalBoughtItem}}</label>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <label for="Sector" class="control-label">Total of sold item: {{currentBankInfo.TotalSoldItem}}</label>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
             </div>

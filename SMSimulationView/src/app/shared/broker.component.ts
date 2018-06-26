@@ -113,7 +113,6 @@ export class BrokerComponent implements OnInit {
         this.buyingItemList.forEach((res) => {
             if (res.Id == selectedBuySectorId) {
                 this.buyItemPrice = res.CurrentPrice;
-                this.selectedBuyStockId = res.CurrentPrice;
             }
        
         });
