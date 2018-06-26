@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-//import { StockService } from '../shared/services/stock.service';
+import { Service } from '../shared/services/service';
 import { Stock, AnalystModel } from '../models/stock';
 declare var brain_predict: any;
 
@@ -19,7 +19,7 @@ export class AnalystComponent implements OnInit {
         serie: []
     }
 
-    constructor(/*private stockService: StockService*/) {
+    constructor(private service: Service) {
 
     }
 
@@ -28,32 +28,30 @@ export class AnalystComponent implements OnInit {
     }
 
     get(): void {
-        //this.stockService.getDataForPredicate()
-        //    .subscribe((data: AnalystModel[]) => {
-        //        for (var i = 0; i < data.length; i++) {
-        //            var obj = data[i];
+        this.service.getDataForPredicate()
+            .subscribe((data: AnalystModel[]) => {
+                for (var i = 0; i < data.length; i++) {
+                    var obj = data[i];
 
-        //            this.config.serie = obj.valus;
-        //            var prediction = brain_predict.predict(this.config);
-        //            obj.PredictPrice = prediction.prediction[0];
-        //            if (obj.CurrentPrice > obj.PredictPrice) {
-        //                var stock = new AnalystModel();
-        //                stock.Name = obj.Name;
-        //                stock.PredictPrice = obj.PredictPrice;
-        //                this.sellingStock.push(stock);
+                    this.config.serie = obj.valus;
+                    var prediction = brain_predict.predict(this.config);
+                    obj.PredictPrice = prediction.prediction[0];
+                    if (obj.CurrentPrice > obj.PredictPrice) {
+                        var stock = new AnalystModel();
+                        stock.Name = obj.Name;
+                        stock.PredictPrice = obj.PredictPrice;
+                        this.sellingStock.push(stock);
+                    } else {
+                        var stock = new AnalystModel();
+                        stock.Name = obj.Name;
+                        stock.PredictPrice = obj.PredictPrice;
+                        this.buyingStock.push(stock);
+                    }
+                }
 
-        //            } else {
-        //                var stock = new AnalystModel();
-        //                stock.Name = obj.Name;
-        //                stock.PredictPrice = obj.PredictPrice;
-        //                this.buyingStock.push(stock);
-        //            }
-        //        }
-
-        //        this.analystModel = data;
-
-        //    },
-        //    (error: Response) => {
-        //    });
+                this.analystModel = data;
+           },
+           (error: Response) => {
+           });
     }
 }

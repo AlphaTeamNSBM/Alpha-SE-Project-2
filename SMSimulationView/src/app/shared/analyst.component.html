@@ -22,39 +22,14 @@
                                     </tr>
                                 </tfoot>
                                 <tbody>
-                                     <tr>
-                                        <td>IBM</td>
-                                        <td class="text-right text-success"><i class="fa fa-long-arrow-up"></i>       500.25</td>
-                                    </tr>
-                                    <tr>
-                                        <td>HTC</td>
-                                        <td class="text-right text-danger"><i class="fa fa-long-arrow-down"></i>       200.30</td>
-                                    </tr>
-                                    <tr>
-                                        <td>MAC</td>
-                                        <td class="text-right text-danger"><i class="fa fa-long-arrow-down"></i>       150.25</td>
-                                    </tr>
-                                    <tr >
-                                        <td>DELL</td>
-                                        <td class="text-right text-danger"><i class="fa fa-long-arrow-down"></i>       856.25</td>
-                                    </tr>
-                                    <tr>
-                                        <td>IMO</td>
-                                        <td class="text-right text-success"><i class="fa fa-long-arrow-up"></i>       78.14</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Microsoft</td>
-                                        <td class="text-right text-danger"><i class="fa fa-long-arrow-down"></i>       98.98</td>
-                                    </tr>
-                                    <!--<tr *ngFor="let buyingSt of buyingStock;">
+                                    <tr *ngFor="let buyingSt of buyingStock;">
                                         <td>{{buyingSt.Name}}</td>
-                                        <td class="text-right text-success"><i class="fa fa-long-arrow-up"></i>       {{buyingSt.PredictPrice | number : '1.2-2'}}</td>
+                                        <td class="text-right text-success">{{buyingSt.PredictPrice | number : '1.2-2'}}</td>
                                     </tr>
-                                    <tr *ngIf="buyingStock.length < 1">
-                                        <td colspan="2" class="text-center">
-                                            Not Found
-                                        </td>
-                                    </tr>!-->
+                                    <tr *ngFor="let selling of sellingStock;">
+                                        <td>{{selling.Name}}</td>
+                                        <td class="text-right text-danger">{{selling.PredictPrice | number : '1.2-2'}}</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
